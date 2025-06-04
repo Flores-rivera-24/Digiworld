@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate name
-    const existingDigimon = await prisma.digimon.findUnique({
+    const existingDigimon = await prisma.digimon.findFirst({
       where: { name: body.name }
     })
 
