@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 interface Digimon {
@@ -15,7 +15,7 @@ interface Digimon {
   defense: number
   speed: number
   brain: number
-  imageUrl?: string 
+  imageUrl?: string
   createdAt: Date
 }
 
@@ -36,30 +36,46 @@ export default function HomePage() {
     defense: '100',
     speed: '50',
     brain: '50',
-    imageUrl: '' 
+    imageUrl: ''
   })
+
+  useEffect(() => {
+    fetchDigimons()
+  }, [])
+
+  const fetchDigimons = async () => {
+    try {
+      const response = await fetch('/api/digimons')
+      const result = await response.json()
+      if (result.success) {
+        setDigimons(result.data)
+      }
+    } catch (error) {
+      console.error('Error fetching Digimons:', error)
+    }
+  }
 
   // Función para buscar imagen del Digimon en la API
   const searchDigimonImage = async (name: string) => {
     if (!name.trim()) return null
-    
+
     setSearchingImage(true)
     try {
       // API gratuita de Digimon
       const response = await fetch(`https://digimon-api.vercel.app/api/digimon/name/${encodeURIComponent(name)}`)
-      
+
       if (response.ok) {
         const data = await response.json()
         if (data && data[0] && data[0].img) {
           return data[0].img
         }
       }
-      
+
       // Si no encuentra, buscar similar
       const searchResponse = await fetch('https://digimon-api.vercel.app/api/digimon')
       if (searchResponse.ok) {
         const allDigimon = await searchResponse.json()
-        const similar = allDigimon.find((d: any) => 
+        const similar = allDigimon.find((d: any) =>
           d.name.toLowerCase().includes(name.toLowerCase()) ||
           name.toLowerCase().includes(d.name.toLowerCase())
         )
@@ -67,7 +83,7 @@ export default function HomePage() {
           return similar.img
         }
       }
-      
+
       return null
     } catch (error) {
       console.error('Error buscando imagen:', error)
@@ -140,9 +156,9 @@ export default function HomePage() {
       setDigimons(prev => [newDigimon, ...prev])
       setShowForm(false)
       handleCancel()
-      
+
       console.log('Digimon creado:', newDigimon)
-      
+
     } catch (error) {
       console.error('Error al crear Digimon:', error)
     } finally {
@@ -184,7 +200,7 @@ export default function HomePage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-             DigiWorld Manager
+            DigiWorld Manager
           </h1>
           <p className="text-lg text-gray-600">
             Administra tu colección de Digimons
@@ -198,21 +214,21 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Crear Nuevo Digimon
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Información Básica */}
                 <div className="border-b border-gray-200 pb-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Información Básica</h3>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre 
+                      Nombre
                     </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Agumon"
                         required
@@ -236,7 +252,7 @@ export default function HomePage() {
                     <input
                       type="url"
                       value={formData.imageUrl}
-                      onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="https://ejemplo.com/imagen.jpg"
                     />
@@ -264,7 +280,7 @@ export default function HomePage() {
                       </label>
                       <select
                         value={formData.level}
-                        onChange={(e) => setFormData({...formData, level: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="Fresh">🥚 Fresh (Baby I)</option>
@@ -282,7 +298,7 @@ export default function HomePage() {
                       </label>
                       <select
                         value={formData.type}
-                        onChange={(e) => setFormData({...formData, type: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="Vaccine">💉 Vaccine (Protector)</option>
@@ -297,7 +313,7 @@ export default function HomePage() {
                 {/* Sistema de Stats - Mantener igual que antes */}
                 <div className="border-b border-gray-200 pb-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">📊 Stats </h3>
-                  
+
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-red-600 mb-2">
@@ -306,7 +322,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.hp}
-                        onChange={(e) => setFormData({...formData, hp: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, hp: e.target.value })}
                         className="w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                         min="100"
                         max="9999"
@@ -320,7 +336,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.mp}
-                        onChange={(e) => setFormData({...formData, mp: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, mp: e.target.value })}
                         className="w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="50"
                         max="9999"
@@ -336,7 +352,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.offense}
-                        onChange={(e) => setFormData({...formData, offense: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, offense: e.target.value })}
                         className="w-full px-3 py-2 border border-orange-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                         min="1"
                         max="999"
@@ -350,7 +366,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.defense}
-                        onChange={(e) => setFormData({...formData, defense: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, defense: e.target.value })}
                         className="w-full px-3 py-2 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                         min="1"
                         max="999"
@@ -366,7 +382,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.speed}
-                        onChange={(e) => setFormData({...formData, speed: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, speed: e.target.value })}
                         className="w-full px-3 py-2 border border-yellow-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
                         min="1"
                         max="300"
@@ -380,7 +396,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         value={formData.brain}
-                        onChange={(e) => setFormData({...formData, brain: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, brain: e.target.value })}
                         className="w-full px-3 py-2 border border-purple-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                         min="1"
                         max="300"
@@ -392,11 +408,11 @@ export default function HomePage() {
                 {/* Descripción */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción 
+                    Descripción
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={3}
                     placeholder="Describe a tu Digimon..."
@@ -529,8 +545,8 @@ export default function HomePage() {
                   </div>
 
                   <p className="text-gray-600 text-sm mb-4">
-                    {digimon.description.length > 60 
-                      ? `${digimon.description.substring(0, 60)}...` 
+                    {digimon.description.length > 60
+                      ? `${digimon.description.substring(0, 60)}...`
                       : digimon.description
                     }
                   </p>
