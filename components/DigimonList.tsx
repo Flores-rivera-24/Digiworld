@@ -21,7 +21,7 @@ interface DigimonListProps {
   isLoading: boolean
 }
 
-export function DigimonList({ digimons, onDelete, isLoading }: DigimonListProps) {
+export function DigimonList({ digimons, onEdit, onDelete, isLoading }: DigimonListProps) {
   if (digimons.length === 0) {
     return (
       <div className="text-center py-12">
@@ -90,6 +90,13 @@ export function DigimonList({ digimons, onDelete, isLoading }: DigimonListProps)
 
             {/* Acciones */}
             <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => onEdit(digimon)}
+                disabled={isLoading}
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                ✏️ Modificar
+              </button>
               <button
                 onClick={() => onDelete(digimon.id)}
                 disabled={isLoading}
